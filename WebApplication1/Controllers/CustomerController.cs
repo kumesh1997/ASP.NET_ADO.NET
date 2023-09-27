@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
+using WebApplication1.DTO;
 using WebApplication1.Model;
 
 namespace WebApplication1.Controllers
@@ -21,12 +22,13 @@ namespace WebApplication1.Controllers
         // Create Customer
         [HttpPost]
         [Route("addCustomer")]
-        public Customer AddNewCustomer(Customer customer)
+        public CustomerDTO AddNewCustomer(CustomerDTO customer)
         {
             try
             {
+                string guid = GenerateGuid().ToString();
                 SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-                SqlCommand cmd = new SqlCommand("INSERT INTO Customer (UserId, Username, Email, FirstName, LastName, CreatedOn, IsActive) VALUES ('"+customer.UserId+"', '"+customer.Username+"', '"+customer.Email+"', '"+customer.FirstName+"', '"+customer.LastName+"', '"+customer.CreatedOn+"', "+customer.IsActive+");", connection);
+                SqlCommand cmd = new SqlCommand("INSERT INTO Customer (UserId, Username, Email, FirstName, LastName, CreatedOn, IsActive) VALUES ('"+guid+"', '"+customer.Username+"', '"+customer.Email+"', '"+customer.FirstName+"', '"+customer.LastName+"', '"+customer.CreatedOn+"', "+customer.IsActive+");", connection);
                 connection.Open();
                 cmd.ExecuteNonQuery();
                 connection.Close();
@@ -121,7 +123,7 @@ namespace WebApplication1.Controllers
                 SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
                 SqlCommand cmd = connection.CreateCommand();
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = "get_orders_by_customer";
+                cmd.CommandText = "Find_Order_By_Customer";
                 cmd.Parameters.AddWithValue("@customerId", customerId.ToString());
                 connection.Open();
                 SqlDataReader reader = cmd.ExecuteReader();
@@ -148,5 +150,16 @@ namespace WebApplication1.Controllers
                 Console.WriteLine(ex.Message);
             }
         }
+
+        // Generate GUID 
+        public static string GenerateGuid()
+        {
+            // Generate a new GUID
+            Guid newGuid = Guid.NewGuid();
+
+            // Convert the GUID to a string and return it
+            return newGuid.ToString();
+        }
+
     }
 }
